@@ -1,4 +1,3 @@
-
 // ============================ search ================================= 
 $('.search-form__btn').on('click', function () {
     gameSearch()
@@ -9,16 +8,13 @@ $('.search-form__input').on('keyup', function (e) {
         gameSearch()
     }
 })
-// let oldValue = null;
+
 function gameSearch() {
-    // console.log("OLD "+oldValue);
     let keywords = $(".search-form__input").val();
     var rex_rule = /[ \-\.?:\\\/\_\'\*]+/g;
     var value1 = keywords.replace(rex_rule, " ").trim().toLowerCase();
     value1 = value1.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    // console.log("value1 "+value1);
     var url = '/search/' + value1;
-    console.log(value1);
     if (value1 && oldValue != value1) {
         oldValue = value1;
         window.location.href = url;
@@ -31,74 +27,55 @@ function paging(p) {
     if (!p) {
         p = 1;
     }
-    let url = "/paging.ajax";
-    $.ajax({
-        url: url,
-        type: "POST",
-        data: {
-            p: p,
-            keywords: keywords,
-            field_order: field_order,
-            order_type: order_type,
-            category_id: category_id,
-            is_hot: is_hot,
-            is_new: is_new,
-            tag_id: tag_id,
-            limit: limit,
-        },
-        success: function (response) {
-            $(".loading_mask").addClass("hidden-load");
-            // $('html, body').animate({
-            //     scrollTop: $(".scroll-top").offset().top
-            // }, 1000);
-            if (response) {
-                $("#ajax-append").html(response);
 
-                let t = [].slice.call(document.querySelectorAll("img.lazy-image"));
-                if ("IntersectionObserver" in window) {
-                    let e = new IntersectionObserver(function (t, n) {
-                        t.forEach(function (t) {
-                            if (t.isIntersecting) {
-                                let n = t.target;
-                                n.dataset.src && ((n.src = n.dataset.src), n.classList.remove("lazy-image"), e.unobserve(n));
-                            }
-                        });
-                    });
+    // Load từ file HTML tĩnh thay vì gọi AJAX
+    fetch(`./pages/page-${p}.html`)
+        .then(response => response.text())
+        .then(html => {
+            $(".loading_mask").addClass("hidden-load");
+            $("#ajax-append").html(html);
+
+            // Khởi tạo lazy loading cho images
+            let t = [].slice.call(document.querySelectorAll("img.lazy-image"));
+            if ("IntersectionObserver" in window) {
+                let e = new IntersectionObserver(function (t, n) {
                     t.forEach(function (t) {
-                        e.observe(t);
+                        if (t.isIntersecting) {
+                            let n = t.target;
+                            n.dataset.src && ((n.src = n.dataset.src), n.classList.remove("lazy-image"), e.unobserve(n));
+                        }
                     });
-                }
+                });
+                t.forEach(function (t) {
+                    e.observe(t);
+                });
             }
-        }
-    })
+        })
+        .catch(error => {
+            console.error('Error loading page:', error);
+            $(".loading_mask").addClass("hidden-load");
+        });
 }
 
 $(document).ready(function () {
-    addPlugin(); // ajax full_rate + comment
+    addPlugin();
 })
 
 // ajax full_rate + comment
-const regex = /\?clear=1/;
 function addPlugin() {
     if (!id_game && !url_game) {
         return
     }
-    let url = "/add-plugin.ajax";
-    $.ajax({
-        url: url,
-        type: "POST",
-        data: {
-            id_game: id_game,
-            url_game: url_game,
-        },
-        success: function (response) {
-            if (response) {
-                let data = JSON.parse(response);
-                $("#append-rate").html(data.rate);
-                $("#append-comment").html(data.comment);
-            }
-        }
-    })
+    // Load từ file HTML tĩnh cho plugin
+    fetch('./plugins/plugin.html')
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            $("#append-rate").html(doc.querySelector('#rate-content').innerHTML);
+            $("#append-comment").html(doc.querySelector('#comment-content').innerHTML);
+        })
+        .catch(error => console.error('Error loading plugin:', error));
 }
 
 // ===========================  Show more / Show less =======================================
