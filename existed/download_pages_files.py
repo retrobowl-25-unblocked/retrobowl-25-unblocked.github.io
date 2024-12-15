@@ -63,7 +63,7 @@ def save_html(args):
     for attempt in range(2):
         try:
             driver = setup_driver()
-            full_url = f'https://retrobowl25.com/{url}'
+            full_url = f'https://retrobowl-25-unblocked.github.io/{url}'
             
             log(f"[{current_number}/{total_urls}] Get: {url} ({attempt + 1}/2)")
             driver.get(full_url)
