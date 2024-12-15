@@ -157,7 +157,7 @@ sup {
   top: -0.5em;
 }
 
-/* Embedded content
+/*.htmlded content
    ========================================================================== */
 
 /**
@@ -5267,7 +5267,7 @@ body.light .logo__image--dark {
 .flash-container.fullscreen noindex,
 .flash-container.fullscreen p,
 .flash-container.fullscreen object,
-.flash-container.fullscreen embed,
+.flash-container.fullscreen.html,
 .flash-container.fullscreen iframe {
   width: 100%;
   height: 100%
